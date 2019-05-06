@@ -30,18 +30,9 @@ def generate_safe_prime(bits=160):
     while 1:
         g = number.getRandomRange(3, p)
         safe = 1
-
-        if pow(g, 2, p) == 1:
-            safe = 0
-
-        if safe and pow(g, q, p) == 1:
-            safe = 0
-
-        if safe and divmod(p - 1, g)[1] == 0:
-            safe = 0
-
         ginv = number.inverse(g, p)
-        if safe and divmod(p - 1, ginv)[1] == 0:
+
+        if pow(g, 2, p) == 1 or pow(g, q, p) == 1 or divmod(p - 1, g)[1] == 0 or divmod(p - 1, ginv)[1] == 0:
             safe = 0
 
         if safe:
