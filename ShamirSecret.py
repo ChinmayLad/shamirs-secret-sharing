@@ -27,25 +27,25 @@ def generate_safe_prime(bits=160):
         if number.isPrime(p):
             break
 
-        while 1:
-            g = number.getRandomRange(3, p)
-            safe = 1
+    while 1:
+        g = number.getRandomRange(3, p)
+        safe = 1
 
-            if pow(g, 2, p) == 1:
-                safe = 0
+        if pow(g, 2, p) == 1:
+            safe = 0
 
-            if safe and pow(g, q, p) == 1:
-                safe = 0
+        if safe and pow(g, q, p) == 1:
+            safe = 0
 
-            if safe and divmod(p - 1, g)[1] == 0:
-                safe = 0
+        if safe and divmod(p - 1, g)[1] == 0:
+            safe = 0
 
-            ginv = number.inverse(g, p)
-            if safe and divmod(p - 1, ginv)[1] == 0:
-                safe = 0
+        ginv = number.inverse(g, p)
+        if safe and divmod(p - 1, ginv)[1] == 0:
+            safe = 0
 
-            if safe:
-                break
+        if safe:
+            break
 
     x = number.getRandomRange(2, q - 1)
 
