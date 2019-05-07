@@ -1,2 +1,10 @@
 /venv
 .idea/
+*.key
+*.share
+/share
+/temp
+/keys
+/data
+/t
+__*__/

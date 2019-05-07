@@ -2,6 +2,7 @@ import time
 
 from Crypto.Util import number
 from Crypto.Util.number import bignum
+import os
 
 
 def timeit(method):
@@ -19,6 +20,22 @@ def timeit(method):
     return timed
 
 
+def calculate_modular_exponentiation(base, exp, prime):
+    """
+    Fast Modular Exponentiation.
+    Taken from Wikibooks Algorithm Implementation
+    https://en.wikibooks.org/wiki/Algorithm_Implementation/Mathematics/Modular_Exponentiation
+    """
+    mod_exp = bignum(1)
+    i = 0
+    while (exp >> i) > 0:
+        if (exp >> i) & 1:
+            mod_exp = (mod_exp * base) % prime
+        base = (base ** 2) % prime
+        i += 1
+    return mod_exp
+
+
 def generate_safe_prime(bits=160):
     g = bignum(0)
     while 1:
@@ -32,7 +49,10 @@ def generate_safe_prime(bits=160):
         safe = 1
         ginv = number.inverse(g, p)
 
-        if pow(g, 2, p) == 1 or pow(g, q, p) == 1 or divmod(p - 1, g)[1] == 0 or divmod(p - 1, ginv)[1] == 0:
+        if calculate_modular_exponentiation(g, 2, p) == 1 \
+                or calculate_modular_exponentiation(g, q, p) == 1 \
+                or divmod(p - 1, g)[1] == 0 \
+                or divmod(p - 1, ginv)[1] == 0:
             safe = 0
 
         if safe:
@@ -41,6 +61,14 @@ def generate_safe_prime(bits=160):
     x = number.getRandomRange(2, q - 1)
 
     return x, g, p, q
+
+
+def save_to_file(line, filename, path=""):
+    os.makedirs(path, exist_ok=True)
+    with open(path + filename, "w+") as file:
+        file.write(line)
+        file.close()
+    print(filename + " Saved!!")
 
 
 def get_func_val(x, coeffs, prime):
@@ -64,22 +92,6 @@ def create_shares(bits, shares, threshold):
     return x, g, p, q, s
 
 
-def calculate_modular_exponentiation(base, exp, prime):
-    """
-    Fast Modular Exponentiation.
-    Taken from Wikibooks Algorithm Implementation
-    https://en.wikibooks.org/wiki/Algorithm_Implementation/Mathematics/Modular_Exponentiation
-    """
-    mod_exp = bignum(1)
-    i = 0
-    while (exp >> i) > 0:
-        if (exp >> i) & 1:
-            mod_exp = (mod_exp * base) % prime
-        base = (base ** 2) % prime
-        i += 1
-    return mod_exp
-
-
 def calculate_decrypt_share(share, c1, prime):
     _, y = share
     decrypt_share = calculate_modular_exponentiation(c1, y, prime)
@@ -91,7 +103,7 @@ def lagrangian_interpolator(i, shares, p):
     dens = bignum(1)
     for j in shares:
         if i != j:
-            nums *= (0-j)
+            nums *= (-j)
             dens *= (i-j)
     """
     Converts (a/b) mod p to (a*b_inv) mod p
@@ -157,7 +169,7 @@ def decrypt_shares(cipher, d_shares, p, q):
 
 @timeit
 def normal_encrypt_decrypt():
-    x, g, p, q, s = create_shares(128, 10, 6)  # initializing variables and private key.
+    x, g, p, q, s = create_shares(128, 10, 5)  # initializing variables and private key.
     y = calculate_modular_exponentiation(g, x, p)  # public key
     print("x: {}, g: {}, p: {}, q: {}, y: {}".format(x, g, p, q, y))
 
@@ -175,9 +187,14 @@ def normal_encrypt_decrypt():
 
 @timeit
 def shamirs_encrypt_decrypt():
-    x, g, p, q, s = create_shares(128, 10, 6)  # initializing variables and private key.
+    x, g, p, q, s = create_shares(128, 10, 5)  # initializing variables and private key.
     y = calculate_modular_exponentiation(g, x, p)  # public key
     print("x: {}, g: {}, p: {}, q: {}, y: {}".format(x, g, p, q, y))
+    save_to_file("{}:{}:{}:{}".format(x, g, p, q), "private.key", "t/")
+    print("{}:{}:{}:{}".format(x, g, p, q))
+    for s_o in s:
+        save_to_file("{}:{}:{}:{}:{}".format(s_o[0], s_o[1], g, p, q), "share_key{}.key".format(s_o[0]), "t/")
+        print("{}:{}:{}:{}:{}".format(s_o[0], s_o[1], g, p, q))
 
     message = "message"
     print("Message: " + str(message))
@@ -185,9 +202,16 @@ def shamirs_encrypt_decrypt():
     # encryption
     message_byte = number.bytes_to_long(bytes(message, 'utf-8'))
     cipher_bytes = encrypt(message_byte, g, y, p, q)
+    save_to_file("{}:{}".format(cipher_bytes[0],cipher_bytes[1]), "encrypted.txt", "t/")
+    print("{}:{}".format(cipher_bytes[0],cipher_bytes[1]))
 
     # shamir secret decryption
     d_shares = [create_decrypt_share(s_i, cipher_bytes[0], p) for s_i in s]
+
+    for d in d_shares:
+        save_to_file("{}:{}:{}:{}:{}".format(d[0], d[1], g, p, q), "dshare{}.share".format(d[0]), "t/")
+        print("{}:{}:{}:{}:{}".format(d[0], d[1], g, p, q))
+
     message_share = decrypt_shares(cipher_bytes, d_shares[:6], p, q)
     print("Decrypted Message: " + number.long_to_bytes(message_share).decode('utf-8'))
 
