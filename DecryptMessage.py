@@ -23,7 +23,7 @@ def decrypt_message(cipherfile, dsharepath):
     shares.sort(key=lambda x: x[0])
     message_byte = ShamirSecret.decrypt_shares((c1, c2), shares, p, q)
     # message = number.long_to_bytes(message_byte).decode('utf-8')
-    print(message_byte)
+    print("Decrypted Message: " + str(message_byte))
 
 
 decrypt_message("data/encrypted.txt", "temp/")

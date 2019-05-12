@@ -42,7 +42,7 @@ def main():
     threshold = int(input("Enter minimum threshold: ").strip())
 
     create_share("shares/", "share_key", x, g, p, q, shares, threshold)
-    message = int(input("Enter message to encrypt(should be number): ").strip())
+    message = number.bignum(input("Enter message to encrypt(should be number): ").strip())
     print(message)
 
     enc_message = ShamirSecret.encrypt(message, g, y, p, q)

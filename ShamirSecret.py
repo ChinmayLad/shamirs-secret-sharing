@@ -190,27 +190,27 @@ def shamirs_encrypt_decrypt():
     x, g, p, q, s = create_shares(128, 10, 5)  # initializing variables and private key.
     y = calculate_modular_exponentiation(g, x, p)  # public key
     print("x: {}, g: {}, p: {}, q: {}, y: {}".format(x, g, p, q, y))
-    save_to_file("{}:{}:{}:{}".format(x, g, p, q), "private.key", "t/")
-    print("{}:{}:{}:{}".format(x, g, p, q))
-    for s_o in s:
-        save_to_file("{}:{}:{}:{}:{}".format(s_o[0], s_o[1], g, p, q), "share_key{}.key".format(s_o[0]), "t/")
-        print("{}:{}:{}:{}:{}".format(s_o[0], s_o[1], g, p, q))
+    # save_to_file("{}:{}:{}:{}".format(x, g, p, q), "private.key", "t/")
+    # print("{}:{}:{}:{}".format(x, g, p, q))
+    # for s_o in s:
+    #     save_to_file("{}:{}:{}:{}:{}".format(s_o[0], s_o[1], g, p, q), "share_key{}.key".format(s_o[0]), "t/")
+    #     print("{}:{}:{}:{}:{}".format(s_o[0], s_o[1], g, p, q))
 
-    message = "message"
+    message = input("Enter message to encrypt: ").strip()
     print("Message: " + str(message))
 
     # encryption
     message_byte = number.bytes_to_long(bytes(message, 'utf-8'))
     cipher_bytes = encrypt(message_byte, g, y, p, q)
-    save_to_file("{}:{}".format(cipher_bytes[0],cipher_bytes[1]), "encrypted.txt", "t/")
-    print("{}:{}".format(cipher_bytes[0],cipher_bytes[1]))
+    # save_to_file("{}:{}".format(cipher_bytes[0],cipher_bytes[1]), "encrypted.txt", "t/")
+    print("Encrypted Text:- {}:{}".format(cipher_bytes[0],cipher_bytes[1]))
 
     # shamir secret decryption
     d_shares = [create_decrypt_share(s_i, cipher_bytes[0], p) for s_i in s]
 
-    for d in d_shares:
-        save_to_file("{}:{}:{}:{}:{}".format(d[0], d[1], g, p, q), "dshare{}.share".format(d[0]), "t/")
-        print("{}:{}:{}:{}:{}".format(d[0], d[1], g, p, q))
+    # for d in d_shares:
+    #     save_to_file("{}:{}:{}:{}:{}".format(d[0], d[1], g, p, q), "dshare{}.share".format(d[0]), "t/")
+    #     print("{}:{}:{}:{}:{}".format(d[0], d[1], g, p, q))
 
     message_share = decrypt_shares(cipher_bytes, d_shares[:6], p, q)
     print("Decrypted Message: " + number.long_to_bytes(message_share).decode('utf-8'))
@@ -233,15 +233,15 @@ def verify_lagrange():
 
 
 def main():
-    print("verify lagrangian")
-    verify_lagrange()
-
-    print("-" * 20)
-
-    print("Normal Encryption and Decryption:")
-    normal_encrypt_decrypt()
-
-    print("-"*20)
+    # print("verify lagrangian")
+    # verify_lagrange()
+    #
+    # print("-" * 20)
+    #
+    # print("Normal Encryption and Decryption:")
+    # normal_encrypt_decrypt()
+    #
+    # print("-"*20)
 
     print("Shamir Secret Encryption and Decryption")
     shamirs_encrypt_decrypt()
