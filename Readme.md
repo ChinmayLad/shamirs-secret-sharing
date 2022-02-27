@@ -1,4 +1,4 @@
-# Sharmir's Secret Sharing
+# Shamir's Secret Sharing
 
 Implementation for Shamir's Secret Sharing Algorithm used for splitting the private key (key thresholding) into number of parts and regenerating the private key back.
 
